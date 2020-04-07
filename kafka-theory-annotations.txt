@@ -1,0 +1,85 @@
+Topics 
+- Similar a um tabela de banco de dados
+- Ao gerar um topico voce pode indicar quantas partitions ele pode ter
+- Cada partição tem um offset dela mesma. Esse offset é ordenado e essa ordem é garantido apenas por partição.
+- A mensagem gerada em uma partition é imutavel.
+- A ordem da mensagem é garantida apenas por partition nunca cross partitions.
+- Se voce enviar uma mensagem para um topico que tem mais de uma partition, a mensagem escolhe a partition randomincamente.
+  Mas você pode indicar uma partição para a mensagem também.
+
+Brokers 
+- Similar a um server
+- É dentro de um broker em que as partitions ficam
+- Os brokers são identificados por um ID numerico, nunca por um nome.
+- São nos brokers onde as partitions ficam armazenadas e distribuidas.
+- Se eu tenho 3 brokers e 1 topic com 3 partitions, cada partition vai ficar em um broker.
+- Se nesse mesmo exemplo eu criar um outro topico com 2 partitions, um dos brokers não conterá o conteúdo dessa nova partition
+- Os brokers no Kafka também são conhecidos como "bootstrap server". 
+  Isso significa que voce precisa se conectar apenas a 1 deles e assim você estará conectado em todo o cluster.
+- Todos os brokers conhecem todos os brokers, topics e partitions (metadata)
+- Quando um Kafka client (producer ou consumer) solicita uma requisição para um dos brokers do cluster de kafka, é retornado uma lista de todos
+  os brokers
+
+Replication Factor
+- Na criação de uma partition, devemos indicar o replication factor dela. 
+  O ideial é que o replication factor seja 3 (Gold Standard).
+- Esse replication factor garante que a partition será replicada entre os brokers.
+  Se eu tenho 3 brokers, e uma partition com replication factor de 3, teremos a informação dessa partition nos 3 brokers.
+- Caso um dos brokers caiam, ainda temos a informação daquela partition nos outros brokers.
+- Apenas um broker pode ser eleito como leader de uma partition especifica. Sendo assim os outros brokers
+  terão as replicas daquela partition (ISRs)
+- Cada partition então tem apenas um lider e multiplas replicas (ISRs)
+- Apenas o broker lider pode servir dados de uma partition. 
+  Os outros brokers irão sicronizar os dados das replicas das partitions a partir da lider.
+- Quem decide o broker que será lider de uma partition é o zookeeper
+- Caso o broker lider de uma partion caia, o zookeeper elege outro broker para ser lider daquela partition.
+- Assim que aquele broker se recuperar, o zookeeper vai eleger novamente quem é o broker lider daquela partition.
+
+Producers
+- Producers são responsaveis por escrever a mensagem para dentro do Kafka.
+- Os producers sabem automaticamente para qual broker e qual partition escrever, não é obrigatório a indicação dos mesmos.
+- Se um broker falhar, cair ou acontecer algo do tipo, o producer consegue se recuperar, 
+  então não é necessário um tratamento para isso
+- Se você não informar uma key para o producer, os dados serão enviados para o Kafka balanceados em round robin
+  mensagem1 -> Broker1-TopicA-Partion0 | mensagem2 -> Broker2-TopicA-Partion1 | mensagem3 -> Broker3-TopicA-Partion2...
+- O producer pode receber informações de niveis de escrita (Acknowledgments).
+  acks=0: O producer envia os dados para o broker e não espera a sinalização do mesmo. Esse nível pode se perder dados,
+  pois se o broker estiver fora, o producer não saberá.
+  acks=1: O producer espera a sinalização de recebimento da mensagem do lider. A perda de dados é limitada nesse caso,
+  pois as replicas da partition não responderam para o producer se a mensagem chegou para elas.
+  acks=all: O producer espera a sinalização tanto do lider quanto das replicas. Sem perigo de perda de dados.
+- O producer pode escolher uma chave para enviar a mensagem
+- A chave pode ser qualquer coisa, um nome, um numero, etc.
+- Se a chave for nula, a mensagem será entregue na regra de load balancer round robin
+- Se a key for enviada, a mensagem sempre será entregue para a mesma partition, nunca para uma outra.
+- A key é utilizada quando voce precisa garantir a ordem de um campo especifico. Por exemplo um o sinal de gps de um caminhão
+  especifico. Podemos utilizar uma key do tipo truck_123, e assim pegar as coordenadas do caminhão ordenadamente. Enviando
+  essa key, ela chegará sempre para a mesma partition.
+- Esse mecanismo é chamado de "key hashing".
+
+Consumers
+- Os consumers são responsaveis por ler os dados dos topics do Kafka
+- Não é necessário informar de qual broker/partition ele vai ler, ele sabe fazer isso sozinho
+- O consumer se recupera de falhas, não é necessário desenvolver uma logica para isso
+- A leitura de dados de uma partition é feita em ordem (offset)
+- Para os consumers conseguirem ler dados do kafka, precisam estar dentro de um consumer group
+- Cada consumer dentro de um consumer group lê de partitions exclusivas daquele consumer group
+- Podemos ter 1 consumer lendo de varias partitions, se tivermos mais consumers que patitions, algum consumer ficará inativo
+- Se temos 1 consumer lendo de multiplas partições, o trabalho de leitura é paralelizado entre as partitions.
+  Lembrando que a ordem da leitura (offset) só é garantida por partition, e nunca cross partition
+
+Consumers Offsets
+- Os offsets são armazenados por consumers groups em topicos chamados "__consumer_offsets"
+- O kafka armazena esses dados de offset assim que os consumers groups vão executando a leitura do topic (tempo real)
+- Esse processo existe para garantir que se um consumer cair, ele consiga voltar a ler de onde ele parou (offset)
+- Podemos configurar quando os consumers podem commitar os offsets do consumer group
+  at most once: o offset é commitado assim que a mensagem chega (antes de se processada). Não é uma configuração aconselhada pois
+                existe o risco de perder dados. Se a mensagem falhar, o offset já foi commitado e essa mensagem será perdida.
+  at least once: Normalmente o preferido. O offset é commitdado apenas quando a mensagem é processada. Se a mensagem falhar
+                 a mensagem será lida novamente. Isso pode resultar em uma leitura duplicada da mesma mensagem. Então é necessário
+                 garantir que o sistema de leitura dos consumers seja idempotente, ou seja, garanta que a leitura duplicada não
+                 afetará o sistema.
+  Exactly once: Esse modo só é alcançado em leituras de kafka para kafka, usando Kafka Streams API. Para Kafka > sistemas externos
+                É necessário a criação de um consumer idempotente também, garantindo que a leitura da mensagem duplicada não
+                impacte o sistema.
+  
