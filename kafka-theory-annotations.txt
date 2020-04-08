@@ -8,7 +8,7 @@ Topics
   Mas você pode indicar uma partição para a mensagem também.
 
 Brokers 
-- Similar a um server
+- É um server
 - É dentro de um broker em que as partitions ficam
 - Os brokers são identificados por um ID numerico, nunca por um nome.
 - São nos brokers onde as partitions ficam armazenadas e distribuidas.
@@ -48,9 +48,9 @@ Producers
   acks=1: O producer espera a sinalização de recebimento da mensagem do lider. A perda de dados é limitada nesse caso,
   pois as replicas da partition não responderam para o producer se a mensagem chegou para elas.
   acks=all: O producer espera a sinalização tanto do lider quanto das replicas. Sem perigo de perda de dados.
-- O producer pode escolher uma chave para enviar a mensagem
-- A chave pode ser qualquer coisa, um nome, um numero, etc.
-- Se a chave for nula, a mensagem será entregue na regra de load balancer round robin
+- O producer pode escolher uma key para enviar a mensagem
+- A key pode ser qualquer coisa, um nome, um numero, etc.
+- Se a key for nula, a mensagem será entregue na regra de load balancer round robin
 - Se a key for enviada, a mensagem sempre será entregue para a mesma partition, nunca para uma outra.
 - A key é utilizada quando voce precisa garantir a ordem de um campo especifico. Por exemplo um o sinal de gps de um caminhão
   especifico. Podemos utilizar uma key do tipo truck_123, e assim pegar as coordenadas do caminhão ordenadamente. Enviando
@@ -58,8 +58,8 @@ Producers
 - Esse mecanismo é chamado de "key hashing".
 
 Consumers
-- Os consumers são responsaveis por ler os dados dos topics do Kafka
-- Não é necessário informar de qual broker/partition ele vai ler, ele sabe fazer isso sozinho
+- Os consumers são responsaveis por ler os dados dos topics do Kafka. Basta informar de qual topic voce quer ler.
+- Não é necessário informar de qual partition ele vai ler, ele sabe fazer isso sozinho
 - O consumer se recupera de falhas, não é necessário desenvolver uma logica para isso
 - A leitura de dados de uma partition é feita em ordem (offset)
 - Para os consumers conseguirem ler dados do kafka, precisam estar dentro de um consumer group
@@ -73,7 +73,7 @@ Consumers Offsets
 - O kafka armazena esses dados de offset assim que os consumers groups vão executando a leitura do topic (tempo real)
 - Esse processo existe para garantir que se um consumer cair, ele consiga voltar a ler de onde ele parou (offset)
 - Podemos configurar quando os consumers podem commitar os offsets do consumer group
-  at most once: o offset é commitado assim que a mensagem chega (antes de se processada). Não é uma configuração aconselhada pois
+  at most once: o offset é commitado assim que a mensagem chega (antes de ser processada). Não é uma configuração aconselhada pois
                 existe o risco de perder dados. Se a mensagem falhar, o offset já foi commitado e essa mensagem será perdida.
   at least once: Normalmente o preferido. O offset é commitdado apenas quando a mensagem é processada. Se a mensagem falhar
                  a mensagem será lida novamente. Isso pode resultar em uma leitura duplicada da mesma mensagem. Então é necessário
@@ -82,4 +82,21 @@ Consumers Offsets
   Exactly once: Esse modo só é alcançado em leituras de kafka para kafka, usando Kafka Streams API. Para Kafka > sistemas externos
                 É necessário a criação de um consumer idempotente também, garantindo que a leitura da mensagem duplicada não
                 impacte o sistema.
-  
+
+
+Zookeeper
+- Responsavel por gerenciar os brokers
+- Responsavel por eleger o broker lider por partition
+- Zookeeper envia dados para o kafka em caso de mudanças (novo topic, queda de um broker, novo broker criado, remoção de topics, etc)
+- O Kafka não funciona sem o zookeeper
+- O zookeeper sempre trabalha com numero impar de servidores (3, 5, 7)
+- Zookeeper tem um lider o qual lida com as escritas dos brokers e o resto dos servidores são seguidores e tratam das leituras
+  dos brokers 
+
+Garantias do Kafka
+- As mensagens são anexadas nas patitions dos topics conforme a ordem em que elas chegam
+- Os consumers leem essas mensagens na ordem em que elas foram armazenadas
+- Com o replifcation factor de N, consumers e producers toleram N-1 brokers falharem.
+  Isso quer dizer que se eu tenho um replication factor de 3, o kafka ainda consegue produzir ou consumir mensagens normalmente
+  caso 2 brokers caiam (N-1 ==> 3-1)
+- Enquanto o numero de partitions for constante (não havendo novas partitions), a mesma chave sempre irá pra mesma partition
