@@ -63,15 +63,16 @@ Consumers
 - O consumer se recupera de falhas, não é necessário desenvolver uma logica para isso
 - A leitura de dados de uma partition é feita em ordem (offset)
 - Para os consumers conseguirem ler dados do kafka, precisam estar dentro de um consumer group
-- Cada consumer dentro de um consumer group lê de partitions exclusivas daquele consumer group
-- Podemos ter 1 consumer lendo de varias partitions, se tivermos mais consumers que patitions, algum consumer ficará inativo
+- Cada consumer dentro de um consumer group lê de partitions exclusivas
+- Podemos ter 1 consumer lendo de varias partitions. Se tivermos mais consumers que patitions, algum consumer ficará inativo.
 - Se temos 1 consumer lendo de multiplas partições, o trabalho de leitura é paralelizado entre as partitions.
   Lembrando que a ordem da leitura (offset) só é garantida por partition, e nunca cross partition
 
 Consumers Offsets
 - Os offsets são armazenados por consumers groups em topicos chamados "__consumer_offsets"
 - O kafka armazena esses dados de offset assim que os consumers groups vão executando a leitura do topic (tempo real)
-- Esse processo existe para garantir que se um consumer cair, ele consiga voltar a ler de onde ele parou (offset)
+- Esse processo existe para garantir que se um consumer cair, ele consiga voltar a ler de onde ele parou e 
+  também não reler as mensagens que ele já leu
 - Podemos configurar quando os consumers podem commitar os offsets do consumer group
   at most once: o offset é commitado assim que a mensagem chega (antes de ser processada). Não é uma configuração aconselhada pois
                 existe o risco de perder dados. Se a mensagem falhar, o offset já foi commitado e essa mensagem será perdida.
