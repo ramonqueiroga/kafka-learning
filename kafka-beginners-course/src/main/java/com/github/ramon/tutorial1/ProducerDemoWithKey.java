@@ -9,11 +9,11 @@ import java.util.Properties;
 
 public class ProducerDemoWithKey {
 
-    private static final String TOPIC = "first_topic";
+    private static final String TOPIC = "my-topic";
     private static final Logger LOG = LoggerFactory.getLogger(ProducerDemoWithKey.class);
     private static final String BOOTSTRAP_SERVER = "127.0.0.1:9092";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         //create producer properties
         Properties properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVER);
@@ -30,20 +30,19 @@ public class ProducerDemoWithKey {
             LOG.info("Key: " + key);
 
             ProducerRecord<String, String> record = new ProducerRecord<String, String>(TOPIC, key, message);
-            producer.send(record, new Callback() {
-                public void onCompletion(RecordMetadata metadata, Exception e) {
-                    if(e == null) {
-                        LOG.info("Received metadata.  + \n" +
-                                                 "Topic: " + metadata.topic() + "\n" +
-                                                 "Partition: " + metadata.partition() + "\n" +
-                                                 "Offset: " + metadata.offset() + "\n" +
-                                                 "Timestamp: " + metadata.timestamp());
-                    } else {
-                        LOG.error("An error has ocurred: " + e.getMessage());
-                    }
+            producer.send(record, (metadata, e) -> {
+                if(e == null) {
+                    LOG.info("Received metadata.  + \n" +
+                                             "Topic: " + metadata.topic() + "\n" +
+                                             "Partition: " + metadata.partition() + "\n" +
+                                             "Offset: " + metadata.offset() + "\n" +
+                                             "Timestamp: " + metadata.timestamp());
+                } else {
+                    LOG.error("An error has occurred: " + e.getMessage());
                 }
             });
 
+            Thread.sleep(1000);
             producer.flush();
         }
 
