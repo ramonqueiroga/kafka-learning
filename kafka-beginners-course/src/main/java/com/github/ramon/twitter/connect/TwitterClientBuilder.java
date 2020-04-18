@@ -2,13 +2,13 @@ package com.github.ramon.twitter.connect;
 
 import com.twitter.hbc.ClientBuilder;
 import com.twitter.hbc.core.Constants;
-import com.twitter.hbc.core.endpoint.StatusesSampleEndpoint;
+import com.twitter.hbc.core.endpoint.StatusesFilterEndpoint;
 import com.twitter.hbc.core.processor.StringDelimitedProcessor;
 import com.twitter.hbc.httpclient.BasicClient;
 import com.twitter.hbc.httpclient.auth.Authentication;
 import com.twitter.hbc.httpclient.auth.OAuth1;
 
-import java.util.Map;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 
@@ -21,9 +21,11 @@ public class TwitterClientBuilder {
     private static final String SAMPLE_EXAMPLE_CLIENT = "sampleExampleClient";
 
     private BlockingQueue<String> queue;
+    private String subject;
 
-    public TwitterClientBuilder(BlockingQueue<String> queue) {
+    public TwitterClientBuilder(BlockingQueue<String> queue, String subject) {
 	this.queue = queue;
+	this.subject = subject;
     }
 
     public BasicClient build() {
@@ -33,9 +35,9 @@ public class TwitterClientBuilder {
         String apiToken = accessConfig.getProperty(API_TOKEN);
         String apiTokenSecret = accessConfig.getProperty(API_TOKEN_SECRET);
 
-        StatusesSampleEndpoint endpoint = new StatusesSampleEndpoint();
-        endpoint.stallWarnings(false);
         Authentication auth = new OAuth1(apiKey, apiSecret, apiToken, apiTokenSecret);
+        StatusesFilterEndpoint endpoint = new StatusesFilterEndpoint();
+        endpoint.trackTerms(Collections.singletonList(subject));
 
         // Create a new BasicClient. By default gzip is enabled.
         return new ClientBuilder()
