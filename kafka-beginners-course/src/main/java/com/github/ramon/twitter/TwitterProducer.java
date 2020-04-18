@@ -26,6 +26,15 @@ public class TwitterProducer {
         BasicClient client = twitterClientBuilder.build();
         client.connect();
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOG.info("stopping application");
+            LOG.info("shutting down client twitter");
+            client.stop();
+            LOG.info("closing kafka producer");
+            producer.close();
+
+        }));
+
         while(!client.isDone()) {
             String message = null;
             try {
@@ -38,16 +47,16 @@ public class TwitterProducer {
             if(message != null) {
                 LOG.info("Captured message: " + message);
                 ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC, message);
-                producer.send(record);
+                producer.send(record, (metadata, e) -> {
+                    if(e != null) {
+                        LOG.error("Something happen with the message!");
+                    }
+                });
                 producer.flush();
             } else {
                 LOG.info("The message is null");
             }
         }
-
-        client.stop();
-        producer.close();
-
     }
 
 }
