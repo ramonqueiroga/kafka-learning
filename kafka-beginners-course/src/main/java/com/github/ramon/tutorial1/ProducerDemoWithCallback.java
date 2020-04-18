@@ -27,17 +27,15 @@ public class ProducerDemoWithCallback {
         for(int i = 0; i < 10; i++) {
             //create a producer record
             ProducerRecord<String, String> record = new ProducerRecord<String, String>(TOPIC, "Producer with callback: " + i);
-            producer.send(record, new Callback() {
-                public void onCompletion(RecordMetadata metadata, Exception e) {
-                    if(e == null) {
-                        LOG.info("Received metadata.  + \n" +
-                                                 "Topic: " + metadata.topic() + "\n" +
-                                                 "Partition: " + metadata.partition() + "\n" +
-                                                 "Offset: " + metadata.offset() + "\n" +
-                                                 "Timestamp: " + metadata.timestamp());
-                    } else {
-                        LOG.error("An error has ocurred: " + e.getMessage());
-                    }
+            producer.send(record, (metadata, e) -> {
+                if(e == null) {
+                    LOG.info("Received metadata.  + \n" +
+                                             "Topic: " + metadata.topic() + "\n" +
+                                             "Partition: " + metadata.partition() + "\n" +
+                                             "Offset: " + metadata.offset() + "\n" +
+                                             "Timestamp: " + metadata.timestamp());
+                } else {
+                    LOG.error("An error has ocurred: " + e.getMessage());
                 }
             });
 
