@@ -29,12 +29,11 @@ public class ConsumerDemoAssignAndSeek {
 	properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_CONFIG);
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
-        //assign and seek are mostly used to replay data or fetch a specific message
 
+        //assign and seek are mostly used to replay data or fetch a specific message
         //assign
         TopicPartition partitionToReadFrom = new TopicPartition(TOPIC, 0);
         consumer.assign(Collections.singletonList(partitionToReadFrom));
-
         //seek
         long offsetToReadFrom = 10L;
         consumer.seek(partitionToReadFrom, offsetToReadFrom);
