@@ -84,7 +84,7 @@ public class ConsumerDemoWithThread {
             try {
                 while(true) {
                     //read the records from topic with timeout config of 100 millis
-                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+                    ConsumerRecords<String, String> records = this.consumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, String> record : records) {
                         LOG.info("Key: " + record.key() + ", Value: " + record.value());
                         LOG.info("Topic: " + record.topic() + ", Partition: " + record.partition() + ", Offset: " + record.offset());
