@@ -18,7 +18,7 @@ public class TwitterClientBuilder {
     private static final String API_SECRET = "API_SECRET";
     private static final String API_TOKEN = "API_TOKEN";
     private static final String API_TOKEN_SECRET = "API_TOKEN_SECRET";
-    private static final String SAMPLE_EXAMPLE_CLIENT = "sampleExampleClient";
+    private static final String SAMPLE_EXAMPLE_CLIENT = "twitterClientSample";
 
     private BlockingQueue<String> queue;
     private String subject;
