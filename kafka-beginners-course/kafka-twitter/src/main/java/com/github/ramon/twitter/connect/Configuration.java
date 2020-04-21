@@ -3,7 +3,9 @@ package com.github.ramon.twitter.connect;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -54,8 +56,14 @@ public class Configuration {
     }
 
     private static InputStream readFile() {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        return classLoader.getResourceAsStream(FILENAME);
+        try {
+            URL url = ClassLoader.getSystemResources("keys.txt").nextElement();
+            return url.openStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }
