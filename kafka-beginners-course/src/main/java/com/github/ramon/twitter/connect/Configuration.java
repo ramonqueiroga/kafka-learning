@@ -45,9 +45,9 @@ public class Configuration {
         properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, COMPRESSION);
 
         //high throughput producer
-        //linger config add a delay to produce send message to kafka. This allows the kafka create batches of this messages to send all of them in one request only
-        //this allows our producer work with higher throughput.
+        //linger producer wait configured milliseconds before send the messages to kafka (allows agroup messages in batch)
         properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+        //the max size in KB that producer allows before send the message to kafka. If the max size is fulfilled before the linger configured ms, the message is sent to kafka
         properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, String.valueOf(32*1024));
 
         return properties;
