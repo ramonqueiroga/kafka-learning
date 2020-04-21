@@ -1,4 +1,4 @@
-package com.github.ramon.tutorial1;
+package com.github.ramon.twitter.tutorial1;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
