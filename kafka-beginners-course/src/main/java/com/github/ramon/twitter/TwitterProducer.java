@@ -22,7 +22,7 @@ public class TwitterProducer {
         KafkaProducer<String, String> producer = new KafkaProducer<>(Configuration.retrieveProducerConfig());
         BlockingQueue<String> queue = new LinkedBlockingQueue<>(CAPACITY);
 
-        TwitterClientBuilder twitterClientBuilder = new TwitterClientBuilder(queue, "covid19");
+        TwitterClientBuilder twitterClientBuilder = new TwitterClientBuilder(queue, "ohmygod");
         BasicClient client = twitterClientBuilder.build();
         client.connect();
 
