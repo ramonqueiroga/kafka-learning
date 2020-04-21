@@ -43,6 +43,13 @@ public class Configuration {
 
         //configuring compression to the producer. This config is only producer level, no broker or consumer need to configure compression.
         properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, COMPRESSION);
+
+        //high throughput producer
+        //linger config add a delay to produce send message to kafka. This allows the kafka create batches of this messages to send all of them in one request only
+        //this allows our producer work with higher throughput.
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, String.valueOf(32*1024));
+
         return properties;
     }
 
