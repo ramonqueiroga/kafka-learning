@@ -1,5 +1,6 @@
 package com.github.ramon.twitter.connect;
 
+import com.github.ramon.common.CredentialUtil;
 import com.twitter.hbc.ClientBuilder;
 import com.twitter.hbc.core.Constants;
 import com.twitter.hbc.core.endpoint.StatusesFilterEndpoint;
@@ -12,6 +13,8 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 
+import static com.github.ramon.common.CredentialUtil.retrieveAccessConfig;
+
 public class TwitterClientBuilder {
 
     private static final String API_KEY = "API_KEY";
@@ -19,6 +22,7 @@ public class TwitterClientBuilder {
     private static final String API_TOKEN = "API_TOKEN";
     private static final String API_TOKEN_SECRET = "API_TOKEN_SECRET";
     private static final String SAMPLE_EXAMPLE_CLIENT = "twitterClientSample";
+    private static final String FILENAME = "keys.txt";
 
     private BlockingQueue<String> queue;
     private String subject;
@@ -29,7 +33,7 @@ public class TwitterClientBuilder {
     }
 
     public BasicClient build() {
-        Properties accessConfig = Configuration.retrieveAccessConfig();
+        Properties accessConfig = retrieveAccessConfig(FILENAME);
         String apiKey = accessConfig.getProperty(API_KEY);
         String apiSecret = accessConfig.getProperty(API_SECRET);
         String apiToken = accessConfig.getProperty(API_TOKEN);

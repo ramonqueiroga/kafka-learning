@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>kafka-twitter</artifactId>
+    <artifactId>kafka-consumer-elasticsearch</artifactId>
 
     <dependencies>
         <dependency>
@@ -22,15 +22,21 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client -->
         <dependency>
-            <groupId>com.twitter</groupId>
-            <artifactId>hbc-core</artifactId> <!-- or hbc-twitter4j -->
-            <version>2.2.0</version> <!-- or whatever the latest version is -->
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.6.2</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.ramon</groupId>
-            <artifactId>kafka-common-util</artifactId> <!-- or hbc-twitter4j -->
-            <version>1.0</version> <!-- or whatever the latest version is -->
+            <artifactId>kafka-common-util</artifactId>
+            <version>1.0</version>
         </dependency>
+        
     </dependencies>
+
+
 </project>

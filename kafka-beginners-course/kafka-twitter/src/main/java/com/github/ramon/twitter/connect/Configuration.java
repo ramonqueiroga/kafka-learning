@@ -13,23 +13,9 @@ public class Configuration {
 
     private static final String BOOTSTRAP_SERVER = "127.0.0.1:9092";
     private static final String REGEX    = "=";
-    private static final String FILENAME = "keys.txt";
     private static final String ALL = "all";
     private static final String MAX_IN_FLIGHT_REQUESTS = "5";
     private static final String COMPRESSION = "lz4";
-
-    static Properties retrieveAccessConfig() {
-        InputStream inputStream = readFile();
-        Scanner scanner = new Scanner(inputStream);
-
-        Properties properties = new Properties();
-        while(scanner.hasNext()) {
-            String[] splitedLine = scanner.nextLine().split(REGEX);
-            properties.put(splitedLine[0], splitedLine[1]);
-        }
-
-        return properties;
-    }
 
     public static Properties retrieveProducerConfig() {
         Properties properties = new Properties();
