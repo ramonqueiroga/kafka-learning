@@ -12,7 +12,6 @@ import java.util.Scanner;
 public class Configuration {
 
     private static final String BOOTSTRAP_SERVER = "127.0.0.1:9092";
-    private static final String REGEX    = "=";
     private static final String ALL = "all";
     private static final String MAX_IN_FLIGHT_REQUESTS = "5";
     private static final String COMPRESSION = "lz4";

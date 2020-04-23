@@ -12,7 +12,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 
 import java.util.Properties;
 
-public class ElasticClient {
+public class ElasticSearchClient {
     private static final int PORT = 443;
     private static final String SCHEME = "https";
     private static final String FILENAME = "credentials.txt";
