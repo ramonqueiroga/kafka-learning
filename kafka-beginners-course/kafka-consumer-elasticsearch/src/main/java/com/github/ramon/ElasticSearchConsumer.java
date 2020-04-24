@@ -37,17 +37,18 @@ public class ElasticSearchConsumer {
 
     public static void main(String[] args) throws IOException {
         KafkaConsumer<String, String> consumer = createConsumer();
-        RestHighLevelClient client = createClient();
+        RestHighLevelClient elasticClient = createClient();
 
         while(true) {
             ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(100));
             int batchCount = consumerRecords.count();
             LOG.info("Received " +  batchCount + " records");
-
             BulkRequest bulkRequest = new BulkRequest();
+
             for (ConsumerRecord<String, String> record : consumerRecords) {
                 String twitterMessage = record.value();
-                //This guarantee the idempotent process. With the configured id we never duplicate the message in the elasticsearch if the consumer reads the same message again.
+                //This guarantee the idempotent process.
+                //Sending the same id to the elastic we never duplicate the data if it is processed one more time
                 String twitterId = extractFieldValue(twitterMessage, ID_STR);
 
                 //if we dont inform a type in the IndexRequest, the default created type is "_doc", so you will find the data in "twitter/_docs/{id}
@@ -61,7 +62,7 @@ public class ElasticSearchConsumer {
 
             if(batchCount > 0) {
                 LOG.info("Sending batch messages");
-                client.bulk(bulkRequest, RequestOptions.DEFAULT);
+                elasticClient.bulk(bulkRequest, RequestOptions.DEFAULT);
                 LOG.info("Commiting offset");
                 consumer.commitSync();
             }
